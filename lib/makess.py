@@ -53,7 +53,7 @@ class Makess:
         for domain in self.targets[host]:
             self.log("[+] Making screenshot for domain: " + ''.join(domain).encode('utf8'))
             driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
-            #driver = webdriver.PhantomJS()
+            # driver = webdriver.PhantomJS()
             #driver.set_window_size(1366, 768)
             driver.set_window_size(1280, 800)
             driver.get(domain[0] + domain[1].encode("idna") + domain[2])
@@ -99,14 +99,15 @@ class Makess:
         self.prepare_body += "<hr><br>\n"
         for domain in self.targets[host]:
             self.prepare_body += '<table border="1" bordercolor=GREEN>\n'
-            self.prepare_body += "<tr><td><h2><center><a href=" + ''.join(domain) + " id=\"" + ''.join(domain) + "\">" + ''.join(
+            self.prepare_body += "<tr><td><h2><center><a href=" + ''.join(domain) + " id=\"" + ''.join(
+                domain) + "\">" + ''.join(
                 domain) + "</a></center></h2></td></tr>\n"
             try:
-                self.prepare_body += "<tr><td><h3><b>CMS:</b> " + str(self.cms_dict[''.join(domain)])[0:150] + "</h3>\n"
+                self.prepare_body += "<tr><td><h3><b>CMS:</b> " + str(self.cms_dict[''.join(domain)])[0:100] + "</h3>\n"
             except:
                 self.prepare_body += "<tr><td><h3><b>CMS:</b> Cannot identify CMS, recheck it by hand. </h3>\n"
             try:
-                self.prepare_body += "<br> Description: " + str(self.desc_dict[''.join(domain)])[0:150] + "<br>\n"
+                self.prepare_body += "<br> Description: " + str(self.desc_dict[''.join(domain)])[0:100] + "<br>\n"
             except:
                 self.prepare_body += "<br> Description: None <br>\n"
             try:
@@ -117,8 +118,8 @@ class Makess:
                     if len(i) >= 150:
                         w = []
                         n = len(i)
-                        for j in range(0, n, 150):
-                            w.append(i[j:j + 150])
+                        for j in range(0, n, 100):
+                            w.append(i[j:j + 100])
                         self.prepare_body += '<br> '.join(w)
                         continue
                     self.prepare_body += "<br> " + i
