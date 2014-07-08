@@ -132,21 +132,21 @@ class Makess:
 
     def prepare_header_result(self):
         hosts = self.targets.keys()
-        self.prepare_header += "<a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">Results"
-        self.prepare_header += "<span class=\"badge\"> " + str(len(hosts)) + "</span><span class=\"caret\">"
+        self.prepare_header += "<a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">Results\n"
+        self.prepare_header += "<span class=\"badge\"> " + str(len(hosts)) + "</span><span class=\"caret\">\n"
         self.prepare_header += "</span></a>"
+        self.prepare_header += "<ul class=\"dropdown-menu\" role=\"menu\">\n"
 
         while hosts:
             host = hosts.pop()
-            self.prepare_header += "<ul class=\"dropdown-menu\" role=\"menu\">"
-            self.prepare_header += "<li class=\"dropdown-submenu\">"
-            self.prepare_header += "<a tabindex=\"-1\" href=\"#\">"
+            self.prepare_header += "<li class=\"dropdown-submenu\">\n"
+            self.prepare_header += "<a tabindex=\"-1\" href=\"#\">\n"
             self.prepare_header += host
-            self.prepare_header += " <span class=\"badge\"> " + str(len(self.targets[host])) + "</span></a>"
-            self.prepare_header += "<ul class=\"dropdown-menu\">"
+            self.prepare_header += " <span class=\"badge\"> " + str(len(self.targets[host])) + "</span></a>\n"
+            self.prepare_header += "<ul class=\"dropdown-menu\">\n"
             for domain in self.targets[host]:
-                self.prepare_header += "<li><a href=\"#" + ''.join(domain) + "\">" + ''.join(domain) + "</a></li>"
-            self.prepare_header += "</ul>"
+                self.prepare_header += "<li><a href=\"#" + ''.join(domain) + "\">" + ''.join(domain) + "</a></li>\n"
+            self.prepare_header += "</ul>\n"
 
     def make_html_result(self):
         self.log("[+] Making html result")
@@ -199,7 +199,7 @@ class Makess:
                 """ + self.prepare_header + """
               </li></ul>
             <li><a href="#">JSON</a></li>
-            <li><a href="#http://mayaseven.com">About</a></li>
+            <li><a href="https://github.com/MaYaSeVeN/Wmap">About</a></li>
 
           </ul>
         </div><!--/.nav-collapse -->
