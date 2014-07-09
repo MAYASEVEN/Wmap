@@ -21,7 +21,8 @@ class Makess:
         self.cms_dict = {}
         self.header_dict = {}
         self.desc_dict = {}
-        self.log = stdout
+        self.log = self.stdout
+        self.logall = ""
         self.prepare_body = ""
         self.prepare_header = ""
         self.count = 0
@@ -194,7 +195,7 @@ class Makess:
              <li class="dropdown">
                 """ + self.prepare_header + """
               </li></ul>
-            <li><a href="#">JSON</a></li>
+            <li><a href="log.txt">Log</a></li>
             <li><a href="https://github.com/MaYaSeVeN/Wmap">About</a></li>
 
           </ul>
@@ -216,5 +217,6 @@ class Makess:
             index.write(result.encode('utf8'))
 
 
-def stdout(log):
-    print log
+    def stdout(self, log):
+        print log
+        self.logall += log

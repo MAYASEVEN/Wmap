@@ -23,7 +23,8 @@ class Revereip:
         self.ips_or_domains = set(args)
         self.api_key = key
         self.count = 0
-        self.log = stdout
+        self.log = self.stdout
+        self.logall = ""
         self.recheck = recheck
         self.file = file
         self.http = "http://"
@@ -189,6 +190,6 @@ class Revereip:
                 return True
         return False
 
-
-def stdout(log):
-    print log
+    def stdout(self, log):
+        print log
+        self.logall += log

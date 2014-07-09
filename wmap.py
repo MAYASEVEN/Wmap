@@ -7,6 +7,7 @@ __version__ = 'Wmap version 1.1 ( http://mayaseven.com )'
 # Requirement
 # sudo pip install selenium
 # sudo apt-get install phantomjs #phantomjs version 1.4 not work  #install lasted version
+
 import datetime
 import optparse
 import os
@@ -14,11 +15,11 @@ import sys
 import timeit
 import xml.dom.minidom
 
-from lib import stdoutlog, makess, reverseip
+from lib import makess, reverseip
 
 
 def main():
-    stdoutlog.Log.stdout_log("\n" + __version__)
+    print "\n" + __version__
 
     usage = "Usage: python " + sys.argv[
         0] + " -k [Bing API Key] [IP_1] [IP_2] [IP_N] [Domain_1] [Domain_2] [Domain_N]\nUsage: python " + \
@@ -59,28 +60,25 @@ class Wmap:
         self.filexml = filexml
         self.foldername = None
         self.dict_target_from_nmap = {}
-        self.log = stdoutlog.Log.stdout_log
+        self.log = self.stdout
+        self.logall = ""
 
     def run(self):
         start = timeit.default_timer()
         self.make_folder_result()
         if self.filexml:
-            try:
-                dict_target_from_nmap = self.parse_nmap_xml(self.filexml)
-            except IOError:
-                self.log("[-] Error: File does not appear to exist.")
-                exit(1)
+            self.parse_nmap_xml()
             ip_target_from_nmap = self.dict_target_from_nmap.keys()
             reverseIP = reverseip.Revereip(ip_target_from_nmap, self.key, self.recheck, None)
             reverseIP.run()
             targets_from_reverseIP = reverseIP.final_result
             concat_targets = {}
             for i in targets_from_reverseIP.keys():
-                for j in dict_target_from_nmap.keys():
+                for j in self.dict_target_from_nmap.keys():
                     if i == j:
-                        c = targets_from_reverseIP[i] + dict_target_from_nmap[j]
+                        c = targets_from_reverseIP[i] + self.dict_target_from_nmap[j]
                         concat_targets.update({i: c})
-            makeSS = makess.Makess(concat_targets)
+            makeSS = makess.Makess(concat_targets, self.foldername)
             makeSS.run()
         else:
             reverseIP = reverseip.Revereip(self.args, self.key, self.recheck, self.file)
@@ -90,9 +88,13 @@ class Wmap:
         stop = timeit.default_timer()
         total_time = stop - start
         self.log('[+] Wmap done: Mapped in %.2fs seconds' % total_time)
+        with open(self.foldername + "/log.txt", "a") as log_file:
+            log_file.write("\n" + __version__ + reverseIP.logall.replace("[", "\n[") + makeSS.logall.replace("[",
+                                                                                                             "\n[") + self.logall.replace(
+                "[", "\n["))
 
-    def parse_nmap_xml(self, file):
-        input_files = open(file, 'r')
+    def parse_nmap_xml(self):
+        input_files = open(self.filexml, 'r')
         doc = xml.dom.minidom.parse(input_files)
         for host in doc.getElementsByTagName("host"):
             addresses = host.getElementsByTagName("address")
@@ -143,6 +145,10 @@ class Wmap:
         else:
             self.log("[-] Cannot make result folder")
             exit(1)
+
+    def stdout(self, log):
+        print log
+        self.logall += log
 
 
 if __name__ == "__main__":
