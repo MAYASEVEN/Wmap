@@ -2,20 +2,23 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.0 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.1 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
 # sudo apt-get install phantomjs #phantomjs version 1.4 not work  #install lasted version
+import datetime
 import optparse
+import os
 import sys
+import timeit
 import xml.dom.minidom
 
-from lib import makess, reverseip
+from lib import stdoutlog, makess, reverseip
 
 
 def main():
-    print "\n" + __version__
+    stdoutlog.Log.stdout_log("\n" + __version__)
 
     usage = "Usage: python " + sys.argv[
         0] + " -k [Bing API Key] [IP_1] [IP_2] [IP_N] [Domain_1] [Domain_2] [Domain_N]\nUsage: python " + \
@@ -44,73 +47,102 @@ you need to..
     file = options.file
     filexml = options.filexml
 
-    if filexml:
-        try:
-            dict_target_from_nmap = parse_nmap_xml(filexml)
-        except IOError:
-            print "[-] Error: File does not appear to exist."
-            exit(1)
-        ip_target_from_nmap = dict_target_from_nmap.keys()
-        reverseIP = reverseip.Revereip(ip_target_from_nmap, key, recheck, None)
-        reverseIP.run()
-        targets_from_reverseIP = reverseIP.final_result
-        concat_targets = {}
-        for i in targets_from_reverseIP.keys():
-            for j in dict_target_from_nmap.keys():
-                if i == j:
-                    c = targets_from_reverseIP[i] + dict_target_from_nmap[j]
-                    concat_targets.update({i: c})
-        makeSS = makess.Makess(concat_targets)
-        makeSS.run()
-    else:
-        reverseIP = reverseip.Revereip(args, key, recheck, file)
-        reverseIP.run()
-        makeSS = makess.Makess(reverseIP.final_result)
-        makeSS.run()
+    Wmap(args, key, recheck, file, filexml).run()
 
 
-def parse_nmap_xml(file):
-    input_files = open(file, 'r')
-    doc = xml.dom.minidom.parse(input_files)
-    dict_target_from_nmap = {}
-    for host in doc.getElementsByTagName("host"):
-        addresses = host.getElementsByTagName("address")
-        for address in addresses:
-            targets_from_nmap = []
-            if address.getAttribute("addrtype") == "ipv4":
-                ip = address.getAttribute("addr")
-            else:
-                continue
-            for port in host.getElementsByTagName("port"):
-                for state in port.getElementsByTagName("state"):
-                    if state.getAttribute("state") == "open":
-                        for services in port.getElementsByTagName("service"):
-                            targets_temp = []
-                            if "http" in services.getAttribute("name").lower() or "https" in services.getAttribute(
-                                    "name").lower() or port.getAttribute("portid") == "80" or port.getAttribute(
-                                    "portid") == "443":
-                                if "http" in services.getAttribute("name").lower():
-                                    if "ssl" in services.getAttribute(
-                                            "tunnel").lower() or "ssl" in services.getAttribute(
-                                            "product").lower():
+class Wmap:
+    def __init__(self, args, key, recheck, file, filexml):
+        self.args = args
+        self.key = key
+        self.recheck = recheck
+        self.file = file
+        self.filexml = filexml
+        self.foldername = None
+        self.dict_target_from_nmap = {}
+        self.log = stdoutlog.Log.stdout_log
+
+    def run(self):
+        start = timeit.default_timer()
+        self.make_folder_result()
+        if self.filexml:
+            try:
+                dict_target_from_nmap = self.parse_nmap_xml(self.filexml)
+            except IOError:
+                self.log("[-] Error: File does not appear to exist.")
+                exit(1)
+            ip_target_from_nmap = self.dict_target_from_nmap.keys()
+            reverseIP = reverseip.Revereip(ip_target_from_nmap, self.key, self.recheck, None)
+            reverseIP.run()
+            targets_from_reverseIP = reverseIP.final_result
+            concat_targets = {}
+            for i in targets_from_reverseIP.keys():
+                for j in dict_target_from_nmap.keys():
+                    if i == j:
+                        c = targets_from_reverseIP[i] + dict_target_from_nmap[j]
+                        concat_targets.update({i: c})
+            makeSS = makess.Makess(concat_targets)
+            makeSS.run()
+        else:
+            reverseIP = reverseip.Revereip(self.args, self.key, self.recheck, self.file)
+            reverseIP.run()
+            makeSS = makess.Makess(reverseIP.final_result, self.foldername)
+            makeSS.run()
+        stop = timeit.default_timer()
+        total_time = stop - start
+        self.log('[+] Wmap done: Mapped in %.2fs seconds' % total_time)
+
+    def parse_nmap_xml(self, file):
+        input_files = open(file, 'r')
+        doc = xml.dom.minidom.parse(input_files)
+        for host in doc.getElementsByTagName("host"):
+            addresses = host.getElementsByTagName("address")
+            for address in addresses:
+                targets_from_nmap = []
+                if address.getAttribute("addrtype") == "ipv4":
+                    ip = address.getAttribute("addr")
+                else:
+                    continue
+                for port in host.getElementsByTagName("port"):
+                    for state in port.getElementsByTagName("state"):
+                        if state.getAttribute("state") == "open":
+                            for services in port.getElementsByTagName("service"):
+                                targets_temp = []
+                                if "http" in services.getAttribute("name").lower() or "https" in services.getAttribute(
+                                        "name").lower() or port.getAttribute("portid") == "80" or port.getAttribute(
+                                        "portid") == "443":
+                                    if "http" in services.getAttribute("name").lower():
+                                        if "ssl" in services.getAttribute(
+                                                "tunnel").lower() or "ssl" in services.getAttribute(
+                                                "product").lower():
+                                            targets_temp.append("https://")
+                                        else:
+                                            targets_temp.append("http://")
+                                    elif port.getAttribute("portid") == "443":
+                                        targets_temp.append("https://")
+                                    elif "https" in services.getAttribute(
+                                            "name").lower() or "ssl" in services.getAttribute(
+                                            "name").lower():
                                         targets_temp.append("https://")
                                     else:
                                         targets_temp.append("http://")
-                                elif port.getAttribute("portid") == "443":
-                                    targets_temp.append("https://")
-                                elif "https" in services.getAttribute("name").lower() or "ssl" in services.getAttribute(
-                                        "name").lower():
-                                    targets_temp.append("https://")
-                                else:
-                                    targets_temp.append("http://")
-                                targets_temp.append(ip)
-                                targets_temp.append(":" + port.getAttribute("portid"))
-                                targets_from_nmap.append(targets_temp)
-                                dict_target_from_nmap.update({ip: targets_from_nmap})
-                    else:
-                        continue
+                                    targets_temp.append(ip)
+                                    targets_temp.append(":" + port.getAttribute("portid"))
+                                    targets_from_nmap.append(targets_temp)
+                                    self.dict_target_from_nmap.update({ip: targets_from_nmap})
+                        else:
+                            continue
 
-    return dict_target_from_nmap
+    def make_folder_result(self):
+        self.foldername = "output"
+        if not os.path.exists(self.foldername):
+            os.makedirs(self.foldername)
+        self.foldername = self.foldername + "/wmap_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        if not os.path.exists(self.foldername):
+            os.makedirs(self.foldername)
+            os.makedirs(self.foldername + "/img")
+        else:
+            self.log("[-] Cannot make result folder")
+            exit(1)
 
 
 if __name__ == "__main__":

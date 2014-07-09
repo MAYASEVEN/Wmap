@@ -2,34 +2,37 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.0 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.1 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
 # sudo apt-get install phantomjs #phantomjs version 1.4 not work  #install lasted version
 
-import datetime
-import os
 import urllib2
 
 from selenium import webdriver
 
 
 class Makess:
-    def __init__(self, targets):
+    def __init__(self, targets, foldername):
         self.targets = targets
         self.hosts = targets.keys()
-        self.foldername = None
+        self.foldername = foldername
         self.cms_dict = {}
         self.header_dict = {}
         self.desc_dict = {}
         self.log = stdout
         self.prepare_body = ""
         self.prepare_header = ""
+        self.count = 0
+        self.all = 0
 
     def run(self):
-        self.log("\n[+] Web Mapping!!!")
-        self.make_folder_result()
+        hosts = self.targets.keys()
+        while hosts:
+            host = hosts.pop()
+            self.all += len(self.targets[host])
+        self.log("\n[*] Web Mapping " + str(self.all) + " domains")
         while self.hosts:
             host = self.hosts.pop()
             self.screenshot(host)
@@ -37,24 +40,17 @@ class Makess:
         self.prepare_header_result()
         self.make_html_result()
 
-    def make_folder_result(self):
-        self.foldername = "output"
-        if not os.path.exists(self.foldername):
-            os.makedirs(self.foldername)
-        self.foldername = self.foldername + "/wmap_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        if not os.path.exists(self.foldername):
-            os.makedirs(self.foldername)
-            os.makedirs(self.foldername + "/img")
-        else:
-            self.log("[-] Cannot make result folder")
-            exit(1)
-
     def screenshot(self, host):
         for domain in self.targets[host]:
-            self.log("[+] Making screenshot for domain: " + ''.join(domain).encode('utf8'))
-            driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
+            self.count += 1
+            self.log("[" + str(self.count) + "] Making screenshot of " + ''.join(domain).encode('utf8'))
+            try:
+                driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
+            except:
+                self.log("[-] " + domain + " Cannot connect GhostDriver")
+                continue
             # driver = webdriver.PhantomJS()
-            #driver.set_window_size(1366, 768)
+            # driver.set_window_size(1366, 768)
             driver.set_window_size(1280, 800)
             driver.get(domain[0] + domain[1].encode("idna") + domain[2])
             try:
@@ -91,16 +87,16 @@ class Makess:
             self.header_dict.update({''.join(domain).encode('utf8'): response})
             self.cms_dict.update({''.join(domain).encode('utf8'): cms})
             driver.save_screenshot(self.foldername + '/img/' + domain[1].encode('utf8') + ".png")
-            driver.quit
+            # driver.quit
 
     def prepare_html_result(self, host):
         self.prepare_body += "<br><hr>\n"
-        self.prepare_body += "<h1><a href=http://whois.domaintools.com/" + host + ">" + host + "</a></h1>\n"
+        self.prepare_body += "<h1><a href=\"http://whois.domaintools.com/" + host + "\" id=\"" + host + "\"  style=\"padding-top: 80px; margin-top: -80px;\">" + host + "</a></h1>\n"
         self.prepare_body += "<hr><br>\n"
         for domain in self.targets[host]:
             self.prepare_body += '<table border="1" bordercolor=GREEN>\n'
-            self.prepare_body += "<tr><td><h2><center><a href=" + ''.join(domain) + " id=\"" + ''.join(
-                domain) + "\">" + ''.join(
+            self.prepare_body += "<tr><td><h2><center><a href=\"" + ''.join(domain) + "\" id=\"" + ''.join(
+                domain) + "\" style=\"padding-top: 80px; margin-top: -80px;\">" + ''.join(
                 domain) + "</a></center></h2></td></tr>\n"
             try:
                 self.prepare_body += "<tr><td><h3><b>CMS:</b> " + str(self.cms_dict[''.join(domain)])[0:100] + "</h3>\n"
@@ -126,8 +122,8 @@ class Makess:
                 self.prepare_body += "</td></tr>\n"
             except:
                 self.prepare_body += "<br> None</td></tr>\n"
-            self.prepare_body += "<tr><td><a href=" + ''.join(domain) + "><img src=img/" + domain[
-                1] + ".png" + "></a></td></tr>\n"
+            self.prepare_body += "<tr><td><a href=\"" + ''.join(domain) + "\"><img src=\"img/" + domain[
+                1] + ".png" + "\"></a></td></tr>\n"
             self.prepare_body += "</table><br>\n"
 
     def prepare_header_result(self):
@@ -140,7 +136,7 @@ class Makess:
         while hosts:
             host = hosts.pop()
             self.prepare_header += "<li class=\"dropdown-submenu\">\n"
-            self.prepare_header += "<a tabindex=\"-1\" href=\"#\">\n"
+            self.prepare_header += "<a tabindex=\"-1\" href=\"#" + host + "\">\n"
             self.prepare_header += host
             self.prepare_header += " <span class=\"badge\"> " + str(len(self.targets[host])) + "</span></a>\n"
             self.prepare_header += "<ul class=\"dropdown-menu\">\n"
@@ -149,7 +145,7 @@ class Makess:
             self.prepare_header += "</ul>\n"
 
     def make_html_result(self):
-        self.log("[+] Making html result")
+        self.log("[+] Making html result for " + str(self.all) + " domains")
         result = """
 <!DOCTYPE html>
 <html>
@@ -218,7 +214,6 @@ class Makess:
 
         with open(self.foldername + '/index.html', 'w') as index:
             index.write(result.encode('utf8'))
-        self.log('[+] Done')
 
 
 def stdout(log):

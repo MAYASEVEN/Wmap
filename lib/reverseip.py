@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.0 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.1 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -37,7 +37,7 @@ class Revereip:
             self.domain_numbers = 0
             ip_or_domain = self.ips_or_domains.pop()
             self.reverse_ip(ip_or_domain)
-            self.log("[*] You got " + str(self.domain_numbers) + " domains to hack.")
+            self.log("[+] You got " + str(self.domain_numbers) + " domains to hack.")
             self.domains = []
 
     def file_opener(self):
