@@ -16,5 +16,5 @@ You need to..
 2.choose free plan 5,000 Transactions/month -> https://datamarket.azure.com/dataset/bing/searchweb
 
 ![alt tag](http://mayaseven.com/img/wmap7.png)
-![alt tag](http://mayaseven.com/img/wmap.png)
 ![alt tag](http://mayaseven.com/img/wmap8.png)
+![alt tag](http://mayaseven.com/img/wmap9.png)
