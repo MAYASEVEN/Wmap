@@ -24,7 +24,8 @@ def main():
     usage = "Usage: python " + sys.argv[
         0] + " -k [Bing API Key] [IP_1] [IP_2] [IP_N] [Domain_1] [Domain_2] [Domain_N]\nUsage: python " + \
             sys.argv[
-                0] + " -k [Bing API Key] -l [list file of IP address]"
+                0] + " -k [Bing API Key] -l [list file of IP address]\nUsage: python " + sys.argv[
+                0] + " -k [Bing API Key] -x [nmap XML file from nmap -oX]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-k", "--key", dest="key", help="Bing API key")
     parser.add_option("-l", "--list", dest="file", metavar="FILE", help="list file of IP address")
