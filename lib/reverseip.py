@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.1 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.2 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -52,6 +52,7 @@ class Revereip:
             exit(1)
 
     def reverse_ip(self, ip_or_domain):
+        self.log("\n[*] Bing Reverse IP")
         raw_domains_temp = []
         name, ip = self.convert_domain_to_ip(ip_or_domain)
         if not ip:

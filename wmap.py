@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.1 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.2 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -33,10 +33,20 @@ def main():
     parser.add_option("-d", "--disable", action="store_false",
                       help="set this option to disable to recheck is that the domain is in IP address",
                       default=True)
+    parser.add_option("-b", "--bing", action="store_false",
+                      help="set this option to disable Bing reverse domains",
+                      default=True)
 
     (options, args) = parser.parse_args()
-
-    if not options.key or (not options.file and not options.filexml and len(args) == 0):
+    if not options.key and not options.bing:
+        key = options.key
+        recheck = options.disable
+        file = options.file
+        filexml = options.filexml
+        bing_reverse = options.bing
+        Wmap(args, key, recheck, file, filexml, bing_reverse).run()
+        exit(0)
+    elif not options.key or (not options.file and not options.filexml and len(args) == 0):
         print parser.format_help()
         print """
 you need to..
@@ -48,12 +58,12 @@ you need to..
     recheck = options.disable
     file = options.file
     filexml = options.filexml
-
-    Wmap(args, key, recheck, file, filexml).run()
+    bing_reverse = options.bing
+    Wmap(args, key, recheck, file, filexml, bing_reverse).run()
 
 
 class Wmap:
-    def __init__(self, args, key, recheck, file, filexml):
+    def __init__(self, args, key, recheck, file, filexml, bing_reverse):
         self.args = args
         self.key = key
         self.recheck = recheck
@@ -63,11 +73,16 @@ class Wmap:
         self.dict_target_from_nmap = {}
         self.log = self.stdout
         self.logall = ""
+        self.bing_reverse = bing_reverse
 
     def run(self):
         start = timeit.default_timer()
         self.make_folder_result()
-        if self.filexml:
+        if self.filexml and not self.bing_reverse:
+            self.parse_nmap_xml()
+            makeSS = makess.Makess(self.dict_target_from_nmap, self.foldername)
+            makeSS.run()
+        elif self.filexml:
             self.parse_nmap_xml()
             ip_target_from_nmap = self.dict_target_from_nmap.keys()
             reverseIP = reverseip.Revereip(ip_target_from_nmap, self.key, self.recheck, None)
@@ -90,9 +105,11 @@ class Wmap:
         total_time = stop - start
         self.log('[+] Wmap done: Mapped in %.2fs seconds' % total_time)
         with open(self.foldername + "/log.txt", "a") as log_file:
-            log_file.write("\n" + __version__ + reverseIP.logall.replace("[", "\n[") + makeSS.logall.replace("[",
-                                                                                                             "\n[") + self.logall.replace(
-                "[", "\n["))
+            log_print = "\n" + __version__
+            if self.bing_reverse:
+                log_print += reverseIP.logall.replace("[", "\n[")
+            log_print += makeSS.logall.replace("[", "\n[") + self.logall.replace("[", "\n[")
+            log_file.write(log_print)
 
     def parse_nmap_xml(self):
         input_files = open(self.filexml, 'r')
@@ -132,6 +149,7 @@ class Wmap:
                                     targets_temp.append(":" + port.getAttribute("portid"))
                                     targets_from_nmap.append(targets_temp)
                                     self.dict_target_from_nmap.update({ip: targets_from_nmap})
+
                         else:
                             continue
 
