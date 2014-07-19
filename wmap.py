@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.2 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.5 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -28,8 +28,9 @@ def main():
                 0] + " -k [Bing API Key] -x [nmap XML file from nmap -oX]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-k", "--key", dest="key", help="Bing API key")
+    parser.add_option("-t", "--timeout", dest="timeout_second", help="set your request timeout(second) default:30s")
     parser.add_option("-l", "--list", dest="file", metavar="FILE", help="list file of IP address")
-    parser.add_option("-x", "--xml", dest="filexml", metavar="XML", help="Parses nmap XML (nmap -oX)")
+    parser.add_option("-x", "--xml", dest="filexml", metavar="XML", help="parses nmap XML (nmap -oX)")
     parser.add_option("-d", "--disable", action="store_false",
                       help="set this option to disable to recheck is that the domain is in IP address",
                       default=True)
@@ -38,13 +39,18 @@ def main():
                       default=True)
 
     (options, args) = parser.parse_args()
-    if not options.key and not options.bing:
-        key = options.key
-        recheck = options.disable
-        file = options.file
-        filexml = options.filexml
-        bing_reverse = options.bing
-        Wmap(args, key, recheck, file, filexml, bing_reverse).run()
+    key = options.key
+    recheck = options.disable
+    file = options.file
+    filexml = options.filexml
+    bing = options.bing
+    timeout_second = options.timeout_second
+
+    if not timeout_second:
+        timeout_second = 30
+
+    if not key and not bing:
+        run(args, key, recheck, file, filexml, bing, timeout_second)
         exit(0)
     elif not options.key or (not options.file and not options.filexml and len(args) == 0):
         print parser.format_help()
@@ -54,16 +60,15 @@ you need to..
 2.choose free plan 5,000 Transactions/month -> https://datamarket.azure.com/dataset/bing/searchweb
         """
         exit(1)
-    key = options.key
-    recheck = options.disable
-    file = options.file
-    filexml = options.filexml
-    bing_reverse = options.bing
-    Wmap(args, key, recheck, file, filexml, bing_reverse).run()
+    run(args, key, recheck, file, filexml, bing, timeout_second)
+
+
+def run(args, key, recheck, file, filexml, bing, timeout_second):
+    Wmap(args, key, recheck, file, filexml, bing, timeout_second).run()
 
 
 class Wmap:
-    def __init__(self, args, key, recheck, file, filexml, bing_reverse):
+    def __init__(self, args, key, recheck, file, filexml, bing_reverse, timeout_second):
         self.args = args
         self.key = key
         self.recheck = recheck
@@ -74,13 +79,14 @@ class Wmap:
         self.log = self.stdout
         self.logall = ""
         self.bing_reverse = bing_reverse
+        self.timeout_second = timeout_second
 
     def run(self):
         start = timeit.default_timer()
         self.make_folder_result()
         if self.filexml and not self.bing_reverse:
             self.parse_nmap_xml()
-            makeSS = makess.Makess(self.dict_target_from_nmap, self.foldername)
+            makeSS = makess.Makess(self.dict_target_from_nmap, self.foldername, self.timeout_second)
             makeSS.run()
         elif self.filexml:
             self.parse_nmap_xml()
@@ -88,21 +94,24 @@ class Wmap:
             reverseIP = reverseip.Revereip(ip_target_from_nmap, self.key, self.recheck, None)
             reverseIP.run()
             targets_from_reverseIP = reverseIP.final_result
-            concat_targets = {}
-            for i in targets_from_reverseIP.keys():
-                for j in self.dict_target_from_nmap.keys():
-                    if i == j:
-                        c = targets_from_reverseIP[i] + self.dict_target_from_nmap[j]
-                        concat_targets.update({i: c})
-            makeSS = makess.Makess(concat_targets, self.foldername)
+            concat_targets_results = {}
+            for key in set(targets_from_reverseIP.keys() + self.dict_target_from_nmap.keys()):
+                try:
+                    concat = targets_from_reverseIP[key] + self.dict_target_from_nmap[key]
+                    concat_targets_results.update({key: concat})
+                except KeyError:
+                    concat_targets_results.update({key: self.dict_target_from_nmap[key]})
+                    pass
+            makeSS = makess.Makess(concat_targets_results, self.foldername, self.timeout_second)
             makeSS.run()
         else:
             reverseIP = reverseip.Revereip(self.args, self.key, self.recheck, self.file)
             reverseIP.run()
-            makeSS = makess.Makess(reverseIP.final_result, self.foldername)
+            makeSS = makess.Makess(reverseIP.final_result, self.foldername, self.timeout_second)
             makeSS.run()
         stop = timeit.default_timer()
         total_time = stop - start
+        self.log("[+] Making html result for " + str(makeSS.all) + " domains")
         self.log('[+] Wmap done: Mapped in %.2fs seconds' % total_time)
         with open(self.foldername + "/log.txt", "a") as log_file:
             log_print = "\n" + __version__
@@ -112,7 +121,11 @@ class Wmap:
             log_file.write(log_print)
 
     def parse_nmap_xml(self):
-        input_files = open(self.filexml, 'r')
+        try:
+            input_files = open(self.filexml, 'r')
+        except IOError:
+            self.log("[-] Error: File does not appear to exist.")
+            exit(1)
         doc = xml.dom.minidom.parse(input_files)
         for host in doc.getElementsByTagName("host"):
             addresses = host.getElementsByTagName("address")
