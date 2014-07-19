@@ -25,7 +25,8 @@ def main():
         0] + " -k [Bing API Key] [IP_1] [IP_2] [IP_N] [Domain_1] [Domain_2] [Domain_N]\nUsage: python " + \
             sys.argv[
                 0] + " -k [Bing API Key] -l [list file of IP address]\nUsage: python " + sys.argv[
-                0] + " -k [Bing API Key] -x [nmap XML file from nmap -oX]"
+        0] + " -k [Bing API Key] -x [nmap XML file from nmap -oX]\nUsage: python " + sys.argv[
+                0] + " -b -x [nmap XML file from nmap -oX]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-k", "--key", dest="key", help="Bing API key")
     parser.add_option("-t", "--timeout", dest="timeout_second", help="set your request timeout(second) default:30s")
@@ -35,7 +36,7 @@ def main():
                       help="set this option to disable to recheck is that the domain is in IP address",
                       default=True)
     parser.add_option("-b", "--bing", action="store_false",
-                      help="set this option to disable Bing reverse domains",
+                      help="set this option to disable Bing reverse ip only work with nmap xml result(-x)",
                       default=True)
 
     (options, args) = parser.parse_args()
