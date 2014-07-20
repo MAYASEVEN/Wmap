@@ -58,7 +58,7 @@ class Makess:
             try:
                 driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
             except:
-                self.log("[-] " + ''.join(domain) + " Cannot connect GhostDriver")
+                self.log("[-] " + ''.join(domain).encode('utf8') + " Cannot connect GhostDriver")
                 continue
             # driver = webdriver.PhantomJS()
             # driver.set_window_size(1366, 768)
