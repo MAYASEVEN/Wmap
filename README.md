@@ -9,6 +9,8 @@ sudo pip install selenium
 
 sudo apt-get install phantomjs #phantomjs version 1.4 not work
 
+more details : http://blog.mayaseven.com/wmap-web-mapper-information-gathering-for-web-hacking/
+
 You need to..
 
 1.register or use microsoft account for get Bing API key -> https://datamarket.azure.com/
