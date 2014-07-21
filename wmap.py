@@ -29,7 +29,7 @@ def main():
                 0] + " -b -x [nmap XML file from nmap -oX]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-k", "--key", dest="key", help="Bing API key")
-    parser.add_option("-t", "--timeout", dest="timeout_second", help="set your request timeout(second) default:30s")
+    parser.add_option("-t", "--timeout", dest="timeout_second", help="set your request timeout(second) default:25s")
     parser.add_option("-l", "--list", dest="file", metavar="FILE", help="list file of IP address")
     parser.add_option("-x", "--xml", dest="filexml", metavar="XML", help="parses nmap XML (nmap -oX)")
     parser.add_option("-d", "--disable", action="store_false",
@@ -48,7 +48,7 @@ def main():
     timeout_second = options.timeout_second
 
     if not timeout_second:
-        timeout_second = 30
+        timeout_second = 25
 
     if not key and not bing:
         run(args, key, recheck, file, filexml, bing, timeout_second)
@@ -136,6 +136,35 @@ class Wmap:
                     ip = address.getAttribute("addr")
                 else:
                     continue
+
+                for hostnames in host.getElementsByTagName("hostnames"):
+                    for hostname in hostnames.getElementsByTagName("hostname"):
+                        targets_temp = []
+                        targets_temp.append("http://")
+                        targets_temp.append(hostname.getAttribute("name"))
+                        targets_temp.append(":80")
+                        targets_from_nmap.append(targets_temp)
+                        self.dict_target_from_nmap.update({ip: targets_from_nmap})
+                        targets_temp = []
+                        targets_temp.append("https://")
+                        targets_temp.append(hostname.getAttribute("name"))
+                        targets_temp.append(":443")
+                        targets_from_nmap.append(targets_temp)
+                        self.dict_target_from_nmap.update({ip: targets_from_nmap})
+
+                #
+                # for table in host.getElementsByTagName("table"):
+                # if table.getAttribute("key") == "subject":
+                #         for elem in table.getElementsByTagName("elem"):
+                #             if elem.getAttribute("key") == "commonName":
+                #                 print table.getElementsByTagName("elem").
+                #                 #element = document.getElementsByTagName('teste')
+                #                 #textelt=element[0].firstChild
+                #                 #print textelt.nodeType, textelt.nodeValue
+                # #print nodes[0].firstChild.nodeValue
+                # #<table key="subject">
+                # #<elem key="commonName">lk.lan</elem>
+
                 for port in host.getElementsByTagName("port"):
                     for state in port.getElementsByTagName("state"):
                         if state.getAttribute("state") == "open":

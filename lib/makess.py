@@ -101,13 +101,14 @@ class Makess:
                                'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; FDM; .NET CLR 2.0.50727; InfoPath.2; .NET CLR 1.1.4322)')
             request.add_header('Referer', 'http://google.com')
             try:
-                response = urllib2.urlopen(request).info()
+                response = urllib2.urlopen(request, timeout=7).info()
             except:
                 response = None
             self.desc_dict.update({''.join(domain).encode('utf8'): desc})
             self.header_dict.update({''.join(domain).encode('utf8'): response})
             self.cms_dict.update({''.join(domain).encode('utf8'): cms})
-            driver.save_screenshot(self.foldername + '/img/' + domain[1].encode('utf8') + ".png")
+            driver.save_screenshot(
+                self.foldername + '/img/' + domain[1].encode('utf8') + domain[2].encode('utf8') + ".png")
             self.prepare_html_body2(domain)
             self.prepare_body3 = self.prepare_body_temp + self.prepare_body1 + self.prepare_body2
             self.prepare_body_temp = self.prepare_body3
@@ -151,7 +152,7 @@ class Makess:
         except:
             self.prepare_body2 += "<br> None</td></tr>\n"
         self.prepare_body2 += "<tr><td><a href=\"" + ''.join(domain) + "\"><img src=\"img/" + domain[
-            1] + ".png" + "\"></a></td></tr>\n"
+            1] + domain[2] + ".png" + "\"></a></td></tr>\n"
         self.prepare_body2 += "</table><br>\n"
 
     def prepare_html_body_timeout(self, domain):
