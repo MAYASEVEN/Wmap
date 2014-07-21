@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.5 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.6 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium

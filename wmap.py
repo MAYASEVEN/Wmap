@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.5 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.6 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -152,7 +152,7 @@ class Wmap:
                         targets_from_nmap.append(targets_temp)
                         self.dict_target_from_nmap.update({ip: targets_from_nmap})
 
-                #
+
                 # for table in host.getElementsByTagName("table"):
                 # if table.getAttribute("key") == "subject":
                 #         for elem in table.getElementsByTagName("elem"):
