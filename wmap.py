@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.6 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.7 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -136,40 +136,17 @@ class Wmap:
                     ip = address.getAttribute("addr")
                 else:
                     continue
-
+                hostnames_FQDN = []
                 for hostnames in host.getElementsByTagName("hostnames"):
                     for hostname in hostnames.getElementsByTagName("hostname"):
-                        targets_temp = []
-                        targets_temp.append("http://")
-                        targets_temp.append(hostname.getAttribute("name"))
-                        targets_temp.append(":80")
-                        targets_from_nmap.append(targets_temp)
-                        self.dict_target_from_nmap.update({ip: targets_from_nmap})
-                        targets_temp = []
-                        targets_temp.append("https://")
-                        targets_temp.append(hostname.getAttribute("name"))
-                        targets_temp.append(":443")
-                        targets_from_nmap.append(targets_temp)
-                        self.dict_target_from_nmap.update({ip: targets_from_nmap})
-
-
-                # for table in host.getElementsByTagName("table"):
-                # if table.getAttribute("key") == "subject":
-                #         for elem in table.getElementsByTagName("elem"):
-                #             if elem.getAttribute("key") == "commonName":
-                #                 print table.getElementsByTagName("elem").
-                #                 #element = document.getElementsByTagName('teste')
-                #                 #textelt=element[0].firstChild
-                #                 #print textelt.nodeType, textelt.nodeValue
-                # #print nodes[0].firstChild.nodeValue
-                # #<table key="subject">
-                # #<elem key="commonName">lk.lan</elem>
+                        hostnames_FQDN.append(hostname.getAttribute("name"))
 
                 for port in host.getElementsByTagName("port"):
                     for state in port.getElementsByTagName("state"):
                         if state.getAttribute("state") == "open":
                             for services in port.getElementsByTagName("service"):
                                 targets_temp = []
+                                targets_protocol_temp = []
                                 if "http" in services.getAttribute("name").lower() or "https" in services.getAttribute(
                                         "name").lower() or port.getAttribute("portid") == "80" or port.getAttribute(
                                         "portid") == "443":
@@ -188,11 +165,20 @@ class Wmap:
                                         targets_temp.append("https://")
                                     else:
                                         targets_temp.append("http://")
+
+                                    targets_protocol_temp = targets_temp[0]
                                     targets_temp.append(ip)
                                     targets_temp.append(":" + port.getAttribute("portid"))
                                     targets_from_nmap.append(targets_temp)
                                     self.dict_target_from_nmap.update({ip: targets_from_nmap})
 
+                                    for fqdn in hostnames_FQDN:
+                                        targets_fqdn_temp = []
+                                        targets_fqdn_temp.append(targets_protocol_temp)
+                                        targets_fqdn_temp.append(fqdn)
+                                        targets_fqdn_temp.append(":" + port.getAttribute("portid"))
+                                        targets_from_nmap.append(targets_fqdn_temp)
+                                        self.dict_target_from_nmap.update({ip: targets_from_nmap})
                         else:
                             continue
 

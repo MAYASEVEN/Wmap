@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Nop Phoomthaisong (aka @MaYaSeVeN)'
-__version__ = 'Wmap version 1.6 ( http://mayaseven.com )'
+__version__ = 'Wmap version 1.7 ( http://mayaseven.com )'
 
 # Requirement
 # sudo pip install selenium
@@ -101,7 +101,7 @@ class Makess:
                                'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; FDM; .NET CLR 2.0.50727; InfoPath.2; .NET CLR 1.1.4322)')
             request.add_header('Referer', 'http://google.com')
             try:
-                response = urllib2.urlopen(request, timeout=7).info()
+                response = urllib2.urlopen(request, timeout=5).info()
             except:
                 response = None
             self.desc_dict.update({''.join(domain).encode('utf8'): desc})
