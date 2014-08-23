@@ -4,6 +4,7 @@ Wmap
 Wmap ("Web Mapper") Information gathering for web hacking.
 
 Requirement
+
 Ubuntu
 
 sudo pip install selenium
@@ -11,8 +12,6 @@ sudo pip install selenium
 sudo apt-get install phantomjs #phantomjs version 1.4 not work
 
 MAC OS
-
-Install Selenium on mac OS
 
 sudo easy_install selenium
 
