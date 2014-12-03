@@ -12,8 +12,9 @@ sudo pip install selenium
 sudo apt-get install phantomjs #phantomjs version 1.4 not work 
 
 or
-Download binary of Phantomjs from
-https://code.google.com/p/phantomjs/downloads/list
+
+Download binary of Phantomjs from https://code.google.com/p/phantomjs/downloads/list
+
 and then copy phantomjs to /usr/local/bin/
 
 MAC OS
