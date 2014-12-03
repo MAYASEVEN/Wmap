@@ -9,7 +9,12 @@ Ubuntu
 
 sudo pip install selenium
 
-sudo apt-get install phantomjs #phantomjs version 1.4 not work
+sudo apt-get install phantomjs #phantomjs version 1.4 not work 
+
+or
+Download binary of Phantomjs from
+https://code.google.com/p/phantomjs/downloads/list
+and then copy phantomjs to /usr/local/bin/
 
 MAC OS
 
@@ -19,7 +24,7 @@ Download binary of Phantomjs from
 
 https://code.google.com/p/phantomjs/downloads/list
 
-and then copy phantomjs to /usr/bin/
+and then copy phantomjs to /usr/local/bin/
 
 more details : http://blog.mayaseven.com/wmap-web-mapper-information-gathering-for-web-hacking/
 
